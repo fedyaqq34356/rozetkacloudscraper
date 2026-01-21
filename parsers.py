@@ -28,7 +28,6 @@ def extract_product_ids(client: ApiClient, base_url: str, pages: int) -> List[st
     htmls = []
     for url in urls:
         htmls.append(client.get(url))
-        time.sleep(random.uniform(0.2, 0.5))
     
     ids = sorted({
         pid for html in htmls
@@ -49,7 +48,6 @@ def fetch_product_details(client: ApiClient, ids: List[str]) -> Dict[str, Dict]:
             as_json=True
         )
         results.append(result)
-        time.sleep(random.uniform(0.3, 0.6))
     
     details = {
         str(p['id']): p
@@ -63,7 +61,6 @@ def fetch_product_details(client: ApiClient, ids: List[str]) -> Dict[str, Dict]:
 def fetch_product_main(client: ApiClient, product_id: str) -> Dict:
     url = f"{API_BASE}/pages/product/main?country=UA&lang=ua&id={product_id}&isGroup=false"
     result = client.get(url, as_json=True)
-    time.sleep(random.uniform(0.1, 0.3))
     return result.get('data', {}).get('productData', {})
 
 def fetch_all_product_mains(client: ApiClient, ids: List[str]) -> List[Dict]:
@@ -74,7 +71,6 @@ def fetch_comments_page(client: ApiClient, product_id: str, page: int, seller_id
     url = (f"{PRODUCT_API_BASE}/comments/get?country=UA&lang=ua&goods={product_id}"
            f"&limit={COMMENTS_PER_PAGE}&page={page}&sort=from_buyer&topSellerId={seller_id}&type=comment")
     result = client.get(url, as_json=True)
-    time.sleep(random.uniform(0.1, 0.3))
     return result
 
 def fetch_all_comments(client: ApiClient, product_id: str) -> Dict:

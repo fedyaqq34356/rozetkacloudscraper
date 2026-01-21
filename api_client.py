@@ -28,11 +28,10 @@ class ApiClient:
             self.scraper.close()
             logger.info("Сесія закрита")
     
-    def get(self, url: str, as_json: bool = False, max_retries: int = 5) -> Any:
+    def get(self, url: str, as_json: bool = False, max_retries: int = 3) -> Any:
         for attempt in range(max_retries):
             try:
-                delay = random.uniform(0.3, 0.8)
-                time.sleep(delay)
+                time.sleep(random.uniform(0.05, 0.15))
                 
                 headers = HEADERS.copy()
                 
@@ -60,7 +59,7 @@ class ApiClient:
                 if response.status_code == 403:
                     logger.warning(f"403 Forbidden [{attempt + 1}/{max_retries}]")
                     if attempt < max_retries - 1:
-                        wait_time = min((3 ** attempt) + random.uniform(2, 5), 60)
+                        wait_time = min((2 ** attempt) + random.uniform(1, 2), 30)
                         logger.info(f"Очікування {wait_time:.1f}s...")
                         time.sleep(wait_time)
                         continue
@@ -68,14 +67,12 @@ class ApiClient:
                 if response.status_code == 429:
                     logger.warning(f"429 Rate Limited [{attempt + 1}/{max_retries}]")
                     if attempt < max_retries - 1:
-                        wait_time = min((4 ** attempt) + random.uniform(5, 10), 120)
+                        wait_time = min((3 ** attempt) + random.uniform(2, 4), 60)
                         logger.info(f"Очікування {wait_time:.1f}s...")
                         time.sleep(wait_time)
                         continue
                 
                 response.raise_for_status()
-                
-                time.sleep(random.uniform(0.1, 0.3))
                 
                 if as_json:
                     return response.json()
@@ -84,7 +81,7 @@ class ApiClient:
             except cloudscraper.exceptions.CloudflareChallengeError as e:
                 logger.warning(f"Cloudflare Challenge [{attempt + 1}/{max_retries}]")
                 if attempt < max_retries - 1:
-                    wait_time = random.uniform(5, 10)
+                    wait_time = random.uniform(2, 4)
                     logger.info(f"Очікування {wait_time:.1f}s...")
                     time.sleep(wait_time)
                     continue
@@ -93,7 +90,7 @@ class ApiClient:
             except Exception as e:
                 logger.error(f"Помилка: {str(e)[:50]} | {short_url}")
                 if attempt < max_retries - 1:
-                    time.sleep(random.uniform(3, 6))
+                    time.sleep(random.uniform(1, 2))
                     continue
                 raise
         
